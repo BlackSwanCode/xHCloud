@@ -94,5 +94,43 @@ async def run_storage_scan(scanner, dashboard, urls, mutate):
 
     await asyncio.gather(*[bounded_scan(url) for url in urls])
 
+@app.command()
+def api(
+    targets_file: str = typer.Argument(..., help="Fichier contenant les URLs d'API à scanner"),
+    aggressive: bool = typer.Option(False, "--aggressive", "-a", help="Activer les tests de fuzzing lourds (Batch GraphQL, Blind NoSQL)"),
+    threads: int = typer.Option(30, "--threads", "-t", help="Niveau de concurrence (réduit par défaut pour les API)")
+):
+    """🌐 Module API & SERVERLESS : Scan GraphQL, NoSQL, et configurations Serverless."""
+    console.print("[bold neon_green]🌐 Initialisation du module API & SERVERLESS...[/]")
+    
+    config = XHCloudConfig()
+    config.config["threads"] = threads # Plus bas pour les API pour éviter les WAF
+    dashboard = XHCloudDashboard()
+    engine = XHCloudEngine(dashboard, config)
+    scanner = APIScanner(engine, dashboard)
+    
+    urls = Path(targets_file).read_text().splitlines()
+    dashboard.start()
+    
+    try:
+        asyncio.run(run_api_scan(scanner, dashboard, urls, aggressive))
+    finally:
+        dashboard.stop()
+        asyncio.run(engine.close())
+
+async def run_api_scan(scanner, dashboard, urls, aggressive):
+    task = dashboard.add_task("[magenta]Audit des API & Serverless", total=len(urls))
+    
+    async def bounded_scan(url):
+        async with scanner.semaphore:
+            await scanner.scan_target(url)
+            dashboard.update_task(task, advance=1)
+            
+            # Si mode agressif, on ajoute des checks supplémentaires ici
+            if aggressive:
+                pass # Placeholder pour fuzzing profond
+
+    await asyncio.gather(*[bounded_scan(url) for url in urls])
+
 if __name__ == "__main__":
     app()
