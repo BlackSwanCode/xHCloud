@@ -5,6 +5,8 @@ from core.ui import XHCloudDashboard, console
 from core.engine import XHCloudEngine, XHCloudConfig
 from modules.recon.generator import CloudReconGenerator
 from modules.storage.scanner import StorageScanner
+from modules.audit.scanner import AuditScanner
+from core.reporter import ReportGenerator
 
 app = typer.Typer(help="☁️ xHCloud : Suite unifiée de pentest Cloud & API ultra-puissante.")
 
@@ -131,6 +133,49 @@ async def run_api_scan(scanner, dashboard, urls, aggressive):
                 pass # Placeholder pour fuzzing profond
 
     await asyncio.gather(*[bounded_scan(url) for url in urls])
+
+@app.command()
+def audit(
+    targets_file: str = typer.Argument(..., help="Fichier d'URLs à auditer (headers, fichiers sensibles)"),
+    report_format: str = typer.Option("html", "--report", "-r", help="Format du rapport (html, json, ou les deux: all)")
+):
+    """🛡️ Module AUDIT : Vérification des headers de sécurité et exposition de fichiers sensibles."""
+    console.print("[bold neon_green]🛡️ Initialisation du module AUDIT...[/]")
+    
+    config = XHCloudConfig()
+    dashboard = XHCloudDashboard()
+    engine = XHCloudEngine(dashboard, config)
+    scanner = AuditScanner(engine, dashboard)
+    
+    urls = Path(targets_file).read_text().splitlines()
+    dashboard.start()
+    
+    try:
+        asyncio.run(run_audit_scan(scanner, dashboard, urls))
+    finally:
+        dashboard.stop()
+        asyncio.run(engine.close())
+        
+        # Génération du rapport à la fin du scan
+        if report_format in ["html", "all"]:
+            reporter = ReportGenerator(dashboard.findings, targets_file)
+            html_file = reporter.generate_html()
+            console.print(f"[bold green]📄 Rapport HTML généré : {html_file}[/]")
+        if report_format in ["json", "all"]:
+            reporter = ReportGenerator(dashboard.findings, targets_file)
+            json_file = reporter.generate_json()
+            console.print(f"[bold green]📄 Rapport JSON généré : {json_file}[/]")
+
+async def run_audit_scan(scanner, dashboard, urls):
+    task = dashboard.add_task("[blue]Audit de surface (Headers & CVS)", total=len(urls))
+    
+    async def bounded_scan(url):
+        async with scanner.semaphore:
+            await scanner.scan_target(url)
+            dashboard.update_task(task, advance=1)
+
+    await asyncio.gather(*[bounded_scan(url) for url in urls])
+
 
 if __name__ == "__main__":
     app()
