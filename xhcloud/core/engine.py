@@ -25,9 +25,11 @@ class XHCloudEngine:
         self.client = self._setup_client()
 
     def _setup_client(self):
-        proxies = self.config.config.get("proxy")
+        # On récupère l'URL du proxy (peut être None)
+        proxy_url = self.config.config.get("proxy")
+        
         return httpx.AsyncClient(
-            proxies=proxies,
+            proxy=proxy_url,  # <-- CORRECTION ICI : 'proxy' au lieu de 'proxies'
             timeout=self.config.config.get("timeout"),
             headers={"User-Agent": self.config.config.get("user_agent")},
             verify=self.config.config.get("verify_ssl"),

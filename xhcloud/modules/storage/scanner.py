@@ -2,8 +2,8 @@ import asyncio
 import re
 from urllib.parse import urlparse
 from typing import List, Dict
-from core.engine import XHCloudEngine
-from core.ui import XHCloudDashboard
+from xhcloud.core.engine import XHCloudEngine
+from xhcloud.core.ui import XHCloudDashboard
 
 # Moteur de Mutation Cross-Cloud (Inspiré de AdvBuckets)
 MUTATION_MAP = {

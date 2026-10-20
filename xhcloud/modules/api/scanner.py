@@ -2,8 +2,8 @@ import asyncio
 import json
 from urllib.parse import urljoin, urlparse
 from typing import List, Dict, Any
-from core.engine import XHCloudEngine
-from core.ui import XHCloudDashboard
+from xhcloud.core.engine import XHCloudEngine
+from xhcloud.core.ui import XHCloudDashboard
 
 # ==============================================================================
 # PAYLOADS CENTRALISÉS (Fusion de AzApi3c & Katchinas)

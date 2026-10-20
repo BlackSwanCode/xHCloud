@@ -1,8 +1,8 @@
 import asyncio
 from urllib.parse import urljoin
 from typing import List
-from core.engine import XHCloudEngine
-from core.ui import XHCloudDashboard
+from xhcloud.core.engine import XHCloudEngine
+from xhcloud.core.ui import XHCloudDashboard
 
 class AuditScanner:
     def __init__(self, engine: XHCloudEngine, dashboard: XHCloudDashboard):

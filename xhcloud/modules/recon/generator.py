@@ -3,8 +3,8 @@ import re
 import socket
 from typing import Set, List, Dict
 from rich.console import Console
-from core.engine import XHCloudEngine
-from core.ui import XHCloudDashboard
+from xhcloud.core.engine import XHCloudEngine
+from xhcloud.core.ui import XHCloudDashboard
 
 console = Console()
 
