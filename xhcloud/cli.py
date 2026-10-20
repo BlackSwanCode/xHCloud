@@ -1,12 +1,12 @@
 import typer
 import asyncio
 from pathlib import Path
-from core.ui import XHCloudDashboard, console
-from core.engine import XHCloudEngine, XHCloudConfig
-from modules.recon.generator import CloudReconGenerator
-from modules.storage.scanner import StorageScanner
-from modules.audit.scanner import AuditScanner
-from core.reporter import ReportGenerator
+from .core.ui import XHCloudDashboard, console
+from .core.engine import XHCloudEngine, XHCloudConfig
+from .modules.recon.generator import CloudReconGenerator
+from .modules.storage.scanner import StorageScanner
+from .modules.audit.scanner import AuditScanner
+from .core.reporter import ReportGenerator
 
 app = typer.Typer(help="☁️ xHCloud : Suite unifiée de pentest Cloud & API ultra-puissante.")
 
