@@ -1,0 +1,20 @@
+#
+# Reconnaissance (Génération & Résolution)
+#
+python -m xhcloud.cli recon "target.com" --providers aws,azure,gcp --keywords --dns
+#
+# Pour le stockage
+grep -E "s3\.|blob\.|storage\.googleapis" xhcloud_recon_output.txt > targets_storage.txt
+# Pour les APIs et le Serverless
+grep -E "api\.|azurewebsites|azurefunctions|graphql" xhcloud_recon_output.txt > targets_api.txt
+# Pour l'audit général
+cat xhcloud_recon_output.txt > targets_audit.txt
+#
+# Scan des stockages avec mutation cross-cloud
+python -m xhcloud.cli storage targets_storage.txt --mutate --threads 100
+
+# Scan des APIs (NoSQL, GraphQL, Serverless Keys)
+python -m xhcloud.cli api targets_api.txt --threads 50
+
+# Audit de surface et GÉNÉRATION DU RAPPORT
+python -m xhcloud.cli audit targets_audit.txt --report all
